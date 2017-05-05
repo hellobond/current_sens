@@ -51,16 +51,16 @@ Packet readData(int size){
 		exit (1) ;
 
 	spiSetup(speed * 1000000) ;
-	printf("assigning Data\n");
+	//printf("assigning Data\n");
 
 	memcpy(data_frame, to_write, 2);
 
-	printBuf(data_frame, size);
+	//printBuf(data_frame, size);
 
 	if (wiringPiSPIDataRW (SPI_CHAN, data_frame, size) == -1){
 		printf ("SPI failure: %s\n", strerror (errno)) ;
 	}
-	printBuf(data_frame, size);
+	//printBuf(data_frame, size);
 
 	read.data[0] = data_frame[0];
 	read.data[1] = data_frame[1];

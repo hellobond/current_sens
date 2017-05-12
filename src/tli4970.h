@@ -44,4 +44,10 @@ Packet readData(int len);
 int parseCurrentPacket(unsigned char packet[2]);
 float getCurrentFromValue(int value);
 
+
+void setupSICI(int pwm_small);
+int SICIBit(bool bit);
+int SICIWord(unsigned char reg, unsigned char val);
+
+
 #endif /* TLI4970_H_ */

@@ -41,14 +41,15 @@ int main() {
 	Packet read_packet;
 	int size = 2;
 	int output = 0;
-	int n = 1000;
+	int n = 100;
 	int t_sleep = samplesToSleep(40, 60);
 
 	timespec curr, last;
 	clock_gettime(CLOCK_REALTIME, &last);
 
 	ofstream outfile("current_data.csv");
-
+	setupSICI(4);
+	SICIWord(0x83, 0x80);
 	for(int i = 0; i < n; i++){
 		clock_gettime(CLOCK_REALTIME, &curr);
 		read_packet = readData(size);

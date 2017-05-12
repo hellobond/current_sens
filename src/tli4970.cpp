@@ -7,7 +7,10 @@
 
 #include "tli4970.h"
 
+#define SICI_PIN	21
+
 static int myFd ;
+int t1, t2, check, wait;
 
 using namespace std;
 
@@ -98,6 +101,54 @@ int parseCurrentPacket(unsigned char packet[2]){
 
 float getCurrentFromValue(int value){
 	return (float)(value -4096)/80;
+}
+
+void setupSICI(int pwm_small){
+
+	t1 = pwm_small;
+	t2 = pwm_small *4;
+	check = pwm_small*3-1;
+	wait = pwm_small;
+}
+
+int SICIBit(bool bit){
+
+	//cout << "SICIBit: " << bit << endl;
+
+	pinMode(SICI_PIN, OUTPUT);
+	if(bit){
+		digitalWrite(SICI_PIN, LOW);
+		delayMicroseconds(t1);
+		digitalWrite(SICI_PIN, HIGH);
+		delayMicroseconds(t2);
+	}
+	else{
+		digitalWrite(SICI_PIN, LOW);
+		delayMicroseconds(t2);
+		digitalWrite(SICI_PIN, HIGH);
+		delayMicroseconds(t1);
+	}
+	pinMode(SICI_PIN, INPUT);
+	delayMicroseconds(check);
+	return digitalRead(SICI_PIN);
+}
+
+
+int SICIWord(unsigned char reg, unsigned char val){
+	unsigned short out_word;
+	int current_bit;
+
+	//concat reg and val into 16bit word bitwise
+	out_word = reg << 8;
+	out_word |= val;
+
+	unsigned char sensor_check_reg = 0x00;
+	for(int i = (sizeof(short)*8)-1;i>=0; i--){
+		current_bit = (out_word >> i) & 1;
+		sensor_check_reg |= SICIBit(current_bit) << i;
+		//cout << "shift " << i << " :" << current_bit << endl;
+	}
+	return 1;
 }
 
 

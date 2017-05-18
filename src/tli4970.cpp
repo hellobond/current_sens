@@ -109,13 +109,13 @@ void setupSICI(int pwm_small){
 	t2 = pwm_small *4;
 	check = pwm_small*3-1;
 	wait = pwm_small;
+	wiringPiSetup();
 }
 
 int SICIBit(bool bit){
 
-	//cout << "SICIBit: " << bit << endl;
-
 	pinMode(SICI_PIN, OUTPUT);
+
 	if(bit){
 		digitalWrite(SICI_PIN, LOW);
 		delayMicroseconds(t1);
@@ -145,10 +145,12 @@ int SICIWord(unsigned char reg, unsigned char val){
 	unsigned char sensor_check_reg = 0x00;
 	for(int i = (sizeof(short)*8)-1;i>=0; i--){
 		current_bit = (out_word >> i) & 1;
+		if(i == sizeof(short)*8-1) //delay before first bit for clock stabilization?
+			delayMicroseconds(50);
 		sensor_check_reg |= SICIBit(current_bit) << i;
-		//cout << "shift " << i << " :" << current_bit << endl;
 	}
-	return 1;
+	cout << "check: " << sensor_check_reg << endl;
+	return sensor_check_reg;
 }
 
 

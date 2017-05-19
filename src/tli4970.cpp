@@ -105,10 +105,16 @@ float getCurrentFromValue(int value){
 
 void setupSICI(int pwm_small){
 
-	t1 = pwm_small;
-	t2 = pwm_small *4;
-	check = pwm_small*3-1;
-	wait = pwm_small;
+//	t1 = pwm_small;
+//	t2 = pwm_small *4;
+//	check = pwm_small*3-1;
+//	check = t2-t1;
+//	wait = pwm_small;
+	t1 = 2;
+	t2 = 6;
+	check = 4;
+	wait = 25;
+
 	wiringPiSetup();
 }
 
@@ -116,19 +122,22 @@ int SICIBit(bool bit){
 
 	pinMode(SICI_PIN, OUTPUT);
 
-	if(bit){
+	if(!bit){
 		digitalWrite(SICI_PIN, LOW);
 		delayMicroseconds(t1);
 		digitalWrite(SICI_PIN, HIGH);
 		delayMicroseconds(t2);
+		digitalWrite(SICI_PIN, LOW);
 	}
 	else{
 		digitalWrite(SICI_PIN, LOW);
 		delayMicroseconds(t2);
 		digitalWrite(SICI_PIN, HIGH);
 		delayMicroseconds(t1);
+		digitalWrite(SICI_PIN, LOW);
 	}
 	pinMode(SICI_PIN, INPUT);
+	//pullUpDnControl(SICI_PIN, PUD_OFF);
 	delayMicroseconds(check);
 	return digitalRead(SICI_PIN);
 }
@@ -148,8 +157,9 @@ int SICIWord(unsigned char reg, unsigned char val){
 		if(i == sizeof(short)*8-1) //delay before first bit for clock stabilization?
 			delayMicroseconds(50);
 		sensor_check_reg |= SICIBit(current_bit) << i;
+		//delayMicroseconds(wait);
 	}
-	cout << "check: " << sensor_check_reg << endl;
+	//cout << "check: " << sensor_check_reg << endl;
 	return sensor_check_reg;
 }
 

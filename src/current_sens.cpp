@@ -49,8 +49,14 @@ int main() {
 
 	ofstream outfile("current_data.csv");
 
-	setupSICI(10);
-	SICIWord(0x83, 0x80);
+	setupSICI(4);
+	cout << "first: " << SICIWord(0x80, 0x01) << endl;
+	delayMicroseconds(25);
+	cout << "second: " << SICIWord(0xFF, 0xFF) << endl;
+	delayMicroseconds(25);
+	cout << "first: " << SICIWord(0x80, 0x00) << endl;
+	delayMicroseconds(25);
+	cout << "second: " << SICIWord(0x00, 0x00) << endl;
 
 	for(int i = 0; i < n; i++){
 		clock_gettime(CLOCK_REALTIME, &curr);

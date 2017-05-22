@@ -120,28 +120,83 @@ void setupSICI(int pwm_small){
 
 int SICIBit(bool bit){
 
+	unsigned int check_wait = 0;
+	timespec start_x, t1_x, t2_x, t_x;
+
 	pinMode(SICI_PIN, OUTPUT);
+
 
 	if(!bit){
 		digitalWrite(SICI_PIN, LOW);
+		clock_gettime(CLOCK_REALTIME, &start_x);
 		delayMicroseconds(t1);
 		digitalWrite(SICI_PIN, HIGH);
+		clock_gettime(CLOCK_REALTIME, &t1_x);
 		delayMicroseconds(t2);
 		digitalWrite(SICI_PIN, LOW);
+		clock_gettime(CLOCK_REALTIME, &t_x);
+		//cout << "start: " <<start_x.tv_nsec << " t: " <<t_x.tv_nsec << " t1: " << t1_x.tv_nsec << endl;
+		//cout <<"t: " <<t_x.tv_nsec - start_x.tv_nsec<<endl;
+		//cout <<"t1: " <<t1_x.tv_nsec - start_x.tv_nsec <<endl;
+		check_wait = (unsigned int)((t_x.tv_nsec - start_x.tv_nsec) - 2*(t1_x.tv_nsec - start_x.tv_nsec))/1000;
 	}
 	else{
 		digitalWrite(SICI_PIN, LOW);
+		clock_gettime(CLOCK_REALTIME, &start_x);
 		delayMicroseconds(t2);
 		digitalWrite(SICI_PIN, HIGH);
+		clock_gettime(CLOCK_REALTIME, &t2_x);
 		delayMicroseconds(t1);
 		digitalWrite(SICI_PIN, LOW);
+		clock_gettime(CLOCK_REALTIME, &t_x);
+		//cout <<"t: " <<t_x.tv_nsec - start_x.tv_nsec<<endl;
+		//cout <<"t2: " <<t2_x.tv_nsec - start_x.tv_nsec <<endl;
+		//check_wait = (unsigned int)(2*(t2_x.tv_nsec - start_x.tv_nsec) - (t_x.tv_nsec - start_x.tv_nsec))/1000;
 	}
 	pinMode(SICI_PIN, INPUT);
 	//pullUpDnControl(SICI_PIN, PUD_OFF);
-	delayMicroseconds(check);
+	//cout << "check_wait: "   << check_wait << endl;
+	delayMicroseconds(3);
 	return digitalRead(SICI_PIN);
 }
 
+unsigned char SICIFrame(unsigned char val[2]){
+
+	unsigned char *out_frame;
+	int current_bit;
+	int width = 2;
+
+	if ((out_frame = new unsigned char[2]) == NULL){
+	    fprintf (stderr, "Unable to allocate buffer: %s\n", strerror (errno)) ;
+	    exit (EXIT_FAILURE);
+	}
+
+	memcpy(out_frame, val, width);
+	printBuf(out_frame, width);
+	unsigned char sensor_check_reg[width];
+
+	for(int i = 0; i < width; i++){
+		sensor_check_reg[i] = 0x00;
+	}
+
+	for(int j = 0; j<width;j++){
+		for(int i = 7;i>=0; i--){
+				current_bit = (out_frame[j] >> i) & 1;
+				if(j == 0 && i == 7) {//delay before first bit for clock stabilization?
+					delayMicroseconds(50);
+					//cout <<"initial delay"<<endl;
+				}
+				//cout << "bit " << i << ": " << current_bit <<endl;
+				sensor_check_reg[j] |= SICIBit(current_bit) << i;
+				//delayMicroseconds(wait);
+			}
+		//cout << "check: " << j << "-"<< hex << (int) sensor_check_reg[j] << dec << endl;
+	}
+
+	cout << "check: " << hex<< (int)sensor_check_reg[0] << " - "<< (int)sensor_check_reg[1] <<dec<< endl;
+	free(out_frame);
+	return sensor_check_reg[1];
+}
 
 int SICIWord(unsigned char reg, unsigned char val){
 	unsigned short out_word;

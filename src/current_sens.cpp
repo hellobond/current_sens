@@ -43,6 +43,7 @@ int main() {
 	int output = 0;
 	int n = 100;
 	int t_sleep = samplesToSleep(40, 60);
+	unsigned char to_write[] = {0x80, 0x00};
 
 	timespec curr, last;
 	clock_gettime(CLOCK_REALTIME, &last);
@@ -50,23 +51,41 @@ int main() {
 	ofstream outfile("current_data.csv");
 
 	setupSICI(4);
-	cout << "first: " << SICIWord(0x80, 0x01) << endl;
 	delayMicroseconds(25);
-	cout << "second: " << SICIWord(0xFF, 0xFF) << endl;
+	SICIFrame(to_write);
+	to_write[0] = 0x00;
+	to_write[1] = 0x00;
 	delayMicroseconds(25);
-	cout << "first: " << SICIWord(0x80, 0x00) << endl;
+	SICIFrame(to_write);
+	to_write[0] = 0x80;
+	to_write[1] = 0x01;
 	delayMicroseconds(25);
-	cout << "second: " << SICIWord(0x00, 0x00) << endl;
+	SICIFrame(to_write);
+	to_write[0] = 0x0e;
+	to_write[1] = 0x00;
+	delayMicroseconds(25);
+	SICIFrame(to_write);
+	to_write[0] = 0x80;
+	to_write[1] = 0x00;
+	delayMicroseconds(25);
+	SICIFrame(to_write);
+//	cout << "first: " << SICIWord(0x80, 0x01) << endl;
+//	delayMicroseconds(25);
+//	cout << "second: " << SICIWord(0xFF, 0xFF) << endl;
+//	delayMicroseconds(25);
+//	cout << "first: " << SICIWord(0x80, 0x00) << endl;
+//	delayMicroseconds(25);
+//	cout << "second: " << SICIWord(0x00, 0x00) << endl;
 
-	for(int i = 0; i < n; i++){
-		clock_gettime(CLOCK_REALTIME, &curr);
-		read_packet = readData(size);
-		output = parseCurrentPacket(read_packet.data);
-		cout << curr.tv_nsec << "," <<  curr.tv_nsec - last.tv_nsec <<" Packet Output: "<< output << " : Current (A): " <<  getCurrentFromValue(output) << endl;
-		outfile << curr.tv_nsec << "," << curr.tv_nsec - last.tv_nsec << "," << output << "," <<  getCurrentFromValue(output) << endl;
-		usleep(t_sleep);
-		last = curr;
-	}
+//	for(int i = 0; i < n; i++){
+//		clock_gettime(CLOCK_REALTIME, &curr);
+//		read_packet = readData(size);
+//		output = parseCurrentPacket(read_packet.data);
+//		cout << curr.tv_nsec << "," <<  curr.tv_nsec - last.tv_nsec <<" Packet Output: "<< output << " : Current (A): " <<  getCurrentFromValue(output) << endl;
+//		outfile << curr.tv_nsec << "," << curr.tv_nsec - last.tv_nsec << "," << output << "," <<  getCurrentFromValue(output) << endl;
+//		usleep(t_sleep);
+//		last = curr;
+//	}
 
 	outfile.close();
 

@@ -17,6 +17,7 @@
 #include <stdint.h>
 #include <string.h>
 #include <errno.h>
+#include <time.h>
 
 #include <wiringPi.h>
 #include <wiringPiSPI.h>
@@ -47,6 +48,7 @@ float getCurrentFromValue(int value);
 
 void setupSICI(int pwm_small);
 int SICIBit(bool bit);
+unsigned char SICIFrame(unsigned char val[2]);
 int SICIWord(unsigned char reg, unsigned char val);
 
 
